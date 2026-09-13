@@ -12,7 +12,7 @@ from fastremove import paths, pipeline, remover
 LOGGER = logging.getLogger(__name__)
 
 mcp = FastMCP(
-    "FastRemove",
+    "fastremove",
     instructions=("Removes image backgrounds locally."),
 )
 

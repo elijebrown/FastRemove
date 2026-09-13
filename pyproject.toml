@@ -1,0 +1,71 @@
+[project]
+name = "fastremove"
+version = "1.0.0"
+description = "A stdio background removal MCP server. Runs local, goes fast."
+readme = "README.md"
+authors = [
+    { name = "Elijah Bruhn" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=4.0.3",
+    "nobg>=0.3.1",
+    "numpy>=2.0",
+    "pillow>=12.3.0",
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+    "transformers>=5.17.0",
+]
+
+# Accelerator selection. A plain `uv sync` takes torch from PyPI, which is
+# CUDA-enabled on Linux and CPU-only on macOS and Windows. The extras pick a
+# specific PyTorch wheel index instead:
+#   uv sync --extra cuda   CUDA 13 wheels (Linux, Windows)
+#   uv sync --extra cpu    slim CPU-only wheels (Linux, Windows)
+[project.optional-dependencies]
+cuda = [
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+]
+cpu = [
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+]
+
+[project.scripts]
+fastremove = "fastremove:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "cuda" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cuda", extra = "cuda", marker = "sys_platform != 'darwin'" },
+    { index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'" },
+]
+torchvision = [
+    { index = "pytorch-cuda", extra = "cuda", marker = "sys_platform != 'darwin'" },
+    { index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"

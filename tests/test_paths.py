@@ -36,9 +36,32 @@ def test_single_string_is_a_file_for_one_input(tmp_path):
     assert outputs == [tmp_path / "cutout.png"]
 
 
-def test_single_string_is_a_directory_for_many_inputs(tmp_path):
+def test_single_string_is_numbered_for_many_inputs(tmp_path):
+    inputs = [touch(tmp_path, "a.jpg"), touch(tmp_path, "b.jpg")]
+    outputs = paths.resolve_output_paths(inputs, str(tmp_path / "cat.png"))
+    assert outputs == [tmp_path / "cat-01.png", tmp_path / "cat-02.png"]
+
+
+def test_bare_string_lands_beside_the_first_input(tmp_path):
+    inputs = [touch(tmp_path, "a.jpg"), touch(tmp_path, "b.jpg")]
+    assert paths.resolve_output_paths(inputs[:1], "cat") == [tmp_path / "cat.png"]
+    assert paths.resolve_output_paths(inputs, "cat") == [
+        tmp_path / "cat-01.png",
+        tmp_path / "cat-02.png",
+    ]
+
+
+def test_counter_widens_past_ninety_nine_inputs(tmp_path):
+    inputs = [touch(tmp_path, f"{index}.jpg") for index in range(100)]
+    outputs = paths.resolve_output_paths(inputs, "cat")
+    assert outputs[0] == tmp_path / "cat-001.png"
+    assert outputs[-1] == tmp_path / "cat-100.png"
+
+
+def test_existing_directory_string_holds_one_file_per_input(tmp_path):
     inputs = [touch(tmp_path, "a.jpg"), touch(tmp_path, "b.jpg")]
     out_dir = tmp_path / "out"
+    out_dir.mkdir()
     outputs = paths.resolve_output_paths(inputs, str(out_dir))
     assert outputs == [out_dir / "a.png", out_dir / "b.png"]
 
